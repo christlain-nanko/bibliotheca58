@@ -34,7 +34,7 @@ public class LoanController {
     }
 
     @PostMapping
-    public LoanResponseDto createLoan(LoanRequestDto loanRequestDto) {
+    public LoanResponseDto createLoan(@RequestBody LoanRequestDto loanRequestDto) {
         return loanService.createLoan(loanRequestDto);
     }
 
