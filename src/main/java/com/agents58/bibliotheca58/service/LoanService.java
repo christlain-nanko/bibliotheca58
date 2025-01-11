@@ -9,7 +9,6 @@ import com.agents58.bibliotheca58.repository.BookRepository;
 import com.agents58.bibliotheca58.repository.LoanRepository;
 import com.agents58.bibliotheca58.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.annotations.NotFound;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -69,7 +68,7 @@ public class LoanService {
 
     public LoanResponseDto createLoan(LoanRequestDto loanRequestDto) {
         Member member = memberRepository.findById(loanRequestDto.memberId())
-                .orElseThrow(() -> new RuntimeException("Member with ID:" + memberId + "not found"));
+                .orElseThrow(() -> new RuntimeException("Member with ID:" + loanRequestDto.memberId() + "not found"));
 
         List<Loan> memberLoans = loanRepository.findByMemberId(member.getId());
         long numberOfBooksOnLoan = memberLoans.stream()

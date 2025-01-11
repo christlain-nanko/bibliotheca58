@@ -5,6 +5,7 @@ import com.agents58.bibliotheca58.dto.BookRequestDto;
 import com.agents58.bibliotheca58.dto.BookResponseDto;
 import com.agents58.bibliotheca58.model.Author;
 import com.agents58.bibliotheca58.model.Book;
+import com.agents58.bibliotheca58.model.Member;
 import com.agents58.bibliotheca58.repository.AuthorRepository;
 import com.agents58.bibliotheca58.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
@@ -123,6 +124,8 @@ public class BookService {
     }
 
     public void deleteBook(Long id) {
-        bookRepository.deleteById(id);
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Book with ID " + id + " not found"));
+        bookRepository.delete(book);
     }
 }

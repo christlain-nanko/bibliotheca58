@@ -3,6 +3,7 @@ package com.agents58.bibliotheca58.service;
 import com.agents58.bibliotheca58.dto.AuthorRequestDto;
 import com.agents58.bibliotheca58.dto.AuthorResponseDto;
 import com.agents58.bibliotheca58.model.Author;
+import com.agents58.bibliotheca58.model.Book;
 import com.agents58.bibliotheca58.repository.AuthorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,11 @@ public class AuthorService {
     public AuthorResponseDto getAuthorById(Long id) {
         Author author = authorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Author with ID:" + id + "not found"));
-        return new AuthorResponseDto(author.getId(), author.getName(), author.getDateOfBirth());
+        return new AuthorResponseDto(
+                author.getId(),
+                author.getName(),
+                author.getDateOfBirth()
+        );
     }
 
     public List<AuthorResponseDto> getAllAuthors() {
@@ -34,7 +39,11 @@ public class AuthorService {
     public AuthorResponseDto getAuthorByName(String name) {
         Author author = authorRepository.findByName(name)
                 .orElseThrow(() -> new RuntimeException("Author with name :" + name + " not found"));
-        return new AuthorResponseDto(author.getId(), author.getName(), author.getDateOfBirth());
+        return new AuthorResponseDto(
+                author.getId(),
+                author.getName(),
+                author.getDateOfBirth()
+        );
     }
 
     public AuthorResponseDto createAuthor(AuthorRequestDto authorRequestDto) {
@@ -66,7 +75,9 @@ public class AuthorService {
     }
 
     public void deleteAuthor(Long id) {
-        authorRepository.deleteById(id);
+        Author author = authorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Author with ID " + id + " not found"));
+        authorRepository.delete(author);
     }
 
 }
