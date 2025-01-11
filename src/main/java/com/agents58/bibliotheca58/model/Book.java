@@ -19,7 +19,7 @@ public class Book {
 
     private String title;
     private String genre;
-    private BigDecimal price;
+    private Double price;
 
     @ManyToOne
     @JoinColumn(name =  "author_id")

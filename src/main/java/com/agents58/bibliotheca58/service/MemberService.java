@@ -1,5 +1,7 @@
 package com.agents58.bibliotheca58.service;
 
+import com.agents58.bibliotheca58.dto.MemberRequestDto;
+import com.agents58.bibliotheca58.dto.MemberResponseDto;
 import com.agents58.bibliotheca58.model.Member;
 import com.agents58.bibliotheca58.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,39 +15,95 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
-    public Member getMemberById(Long id) {
-        return memberRepository.findById(id)
+    public MemberResponseDto getMemberById(Long id) {
+        Member member =  memberRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Member with ID:" + id + "not found"));
+
+        return new MemberResponseDto(
+                member.getId(),
+                member.getUsername(),
+                member.getEmail(),
+                member.getAddress(),
+                member.getPhoneNumber()
+        );
     }
 
-    public Member getMemberByUsername(String username) {
-        return memberRepository.findByUsername(username)
+    public MemberResponseDto getMemberByUsername(String username) {
+        Member member =  memberRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Member with Username:" + username + "not found"));
+
+        return new MemberResponseDto(
+                member.getId(),
+                member.getUsername(),
+                member.getEmail(),
+                member.getAddress(),
+                member.getPhoneNumber()
+        );
     }
 
-    public Member getMemberByEmail(String email) {
-        return memberRepository.findByEmail(email)
+    public MemberResponseDto getMemberByEmail(String email) {
+        Member member =  memberRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Member with email:" + email + "not found"));
+
+        return new MemberResponseDto(
+                member.getId(),
+                member.getUsername(),
+                member.getEmail(),
+                member.getAddress(),
+                member.getPhoneNumber()
+        );
     }
 
-    public List<Member> getAllMembers() {
-        return memberRepository.findAll();
+    public List<MemberResponseDto> getAllMembers() {
+        return memberRepository.findAll().stream()
+                .map( member -> new MemberResponseDto(
+                        member.getId(),
+                        member.getUsername(),
+                        member.getEmail(),
+                        member.getAddress(),
+                        member.getPhoneNumber())
+                ).toList();
     }
 
-    public Member createMember(Member member) {
-        return memberRepository.save(member);
+    public MemberResponseDto createMember(MemberRequestDto memberRequestDto) {
+        Member member = new Member();
+        member.setUsername(memberRequestDto.username());
+        member.setEmail(memberRequestDto.email());
+        member.setAddress(memberRequestDto.address());
+        member.setPhoneNumber(memberRequestDto.phoneNumber());
+        Member newMember = memberRepository.save(member);
+
+        return new MemberResponseDto(
+                newMember.getId(),
+                newMember.getUsername(),
+                newMember.getEmail(),
+                newMember.getAddress(),
+                newMember.getPhoneNumber()
+        );
     }
 
-    public Member updateMember(Member memberDetails) {
-        Member member = getMemberById(memberDetails.getId());
-        member.setUsername(memberDetails.getUsername());
-        member.setEmail(memberDetails.getEmail());
-        member.setAddress(memberDetails.getAddress());
-        member.setPhoneNumber(memberDetails.getPhoneNumber());
-        return memberRepository.save(member);
+    public MemberResponseDto updateMember(Long id , MemberRequestDto memberRequestDto) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Member with ID " + id + " not found"));
+
+        member.setUsername(memberRequestDto.username());
+        member.setEmail(memberRequestDto.email());
+        member.setAddress(memberRequestDto.address());
+        member.setPhoneNumber(memberRequestDto.phoneNumber());
+        Member updatedMember = memberRepository.save(member);
+
+        return new MemberResponseDto(
+                updatedMember.getId(),
+                updatedMember.getUsername(),
+                updatedMember.getEmail(),
+                updatedMember.getAddress(),
+                updatedMember.getPhoneNumber()
+        );
     }
 
     public void deleteMember(Long id) {
-        memberRepository.deleteById(id);
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Member with ID " + id + " not found"));
+        memberRepository.delete(member);
     }
 }

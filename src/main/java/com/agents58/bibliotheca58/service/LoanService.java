@@ -1,5 +1,7 @@
 package com.agents58.bibliotheca58.service;
 
+import com.agents58.bibliotheca58.dto.LoanRequestDto;
+import com.agents58.bibliotheca58.dto.LoanResponseDto;
 import com.agents58.bibliotheca58.model.Book;
 import com.agents58.bibliotheca58.model.Loan;
 import com.agents58.bibliotheca58.model.Member;
@@ -24,44 +26,103 @@ public class LoanService {
     private final LoanRepository loanRepository;
 
 
-    public Loan getLoanById(Long loanId) {
-        return loanRepository.findById(loanId)
+    public LoanResponseDto getLoanById(Long loanId) {
+        Loan loan = loanRepository.findById(loanId)
                 .orElseThrow(() -> new RuntimeException("Loan not found"));
+
+        return new LoanResponseDto(
+                loan.getId(),
+                loan.getDateOfLoan(),
+                loan.getDateOfReturn(),
+                loan.getMember().getUsername(),
+                loan.getBooks().stream()
+                        .map(Book::getTitle)
+                        .toList()
+        );
     }
 
-    public List<Loan> getAllLoans() {
-        return loanRepository.findAll();
+    public List<LoanResponseDto> getAllLoans() {
+        return loanRepository.findAll().stream()
+                .map(loan -> new LoanResponseDto(
+                            loan.getId(),
+                            loan.getDateOfLoan(),
+                            loan.getDateOfReturn(),
+                            loan.getMember().getUsername(),
+                            loan.getBooks().stream()
+                                    .map(Book::getTitle)
+                                    .toList())
+                ).toList();
     }
 
-    public List<Loan> getLoansByMemberId(Long memberId) {
-        return loanRepository.findByMemberId(memberId);
+    public List<LoanResponseDto> getLoansByMemberId(Long memberId) {
+        return loanRepository.findByMemberId(memberId).stream()
+                .map( loan -> new LoanResponseDto(
+                        loan.getId(),
+                        loan.getDateOfLoan(),
+                        loan.getDateOfReturn(),
+                        loan.getMember().getUsername(),
+                        loan.getBooks().stream()
+                                .map(Book::getTitle)
+                                .toList())
+                ).toList();
     }
 
-    public Loan createLoan(Long memberId, Set<Long> bookIds) {
-        Member member = memberRepository.findById(memberId)
+    public LoanResponseDto createLoan(LoanRequestDto loanRequestDto) {
+        Member member = memberRepository.findById(loanRequestDto.memberId())
                 .orElseThrow(() -> new RuntimeException("Member with ID:" + memberId + "not found"));
 
-        long numberOfBooksOnLoan = loanRepository.findAll().stream()
-                .filter(loan -> loan.getMember().getId().equals(memberId))
-                .filter(loan -> loan.getDateOfReturn() == null)
-                .mapToLong(loan -> loan.getBooks().size())
-                .sum();
+        List<Loan> memberLoans = loanRepository.findByMemberId(member.getId());
+        long numberOfBooksOnLoan = memberLoans.stream()
+                .flatMap(loan -> loan.getBooks().stream())
+                .distinct()
+                .count();
 
-        if (numberOfBooksOnLoan + bookIds.size() > 5) {
-            throw new RuntimeException("Every member can only loan up to 5 different books at a time");
+        long requestedBookCount = loanRequestDto.bookIds().size();
+
+        if (numberOfBooksOnLoan + requestedBookCount > 5) {
+            throw new IllegalStateException("Member cannot loan more than 5 books at a time. Currently loaned: "
+                    + numberOfBooksOnLoan + ", Requested: " + requestedBookCount);
         }
 
-        Set<Book> books = new HashSet<>(bookRepository.findAllById(bookIds));
+        // check if books exist
+        List<Book> books = bookRepository.findAllById(loanRequestDto.bookIds());
+        if (books.size() != loanRequestDto.bookIds().size()) {
+            throw new RuntimeException ("One or more books not found for the given IDs: " + loanRequestDto.bookIds());
+        }
 
-        Loan loan = new Loan(LocalDate.now(), member);
-        loan.getBooks().addAll(books);
-        return loanRepository.save(loan);
+        Loan loan = new Loan();
+        loan.setMember(member);
+        loan.setBooks(new HashSet<>(books));
+        loan.setDateOfLoan(loanRequestDto.date());
+        loan.setDateOfReturn(null);
+        Loan newLoan = loanRepository.save(loan);
+
+        return new LoanResponseDto(
+                newLoan.getId(),
+                newLoan.getDateOfLoan(),
+                newLoan.getDateOfReturn(),
+                newLoan.getMember().getUsername(),
+                newLoan.getBooks().stream()
+                        .map(Book::getTitle)
+                        .toList());
     }
 
-    public Loan returnLoan(Long loanId) {
-        Loan loan = getLoanById(loanId);
+
+    public LoanResponseDto returnLoan(Long loanId) {
+        Loan loan = loanRepository.findById(loanId)
+                .orElseThrow(() -> new RuntimeException("Loan with ID " + loanId + " not found"));
         loan.setDateOfReturn(LocalDate.now());
-        return loanRepository.save(loan);
+        Loan updatedLoan = loanRepository.save(loan);
+
+        return new LoanResponseDto(
+                updatedLoan.getId(),
+                updatedLoan.getDateOfLoan(),
+                updatedLoan.getDateOfReturn(),
+                updatedLoan.getMember().getUsername(),
+                updatedLoan.getBooks().stream()
+                        .map(Book::getTitle)
+                        .toList()
+        );
     }
 
 }

@@ -1,6 +1,7 @@
 package com.agents58.bibliotheca58.controller;
 
-import com.agents58.bibliotheca58.model.Author;
+import com.agents58.bibliotheca58.dto.AuthorRequestDto;
+import com.agents58.bibliotheca58.dto.AuthorResponseDto;
 import com.agents58.bibliotheca58.service.AuthorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -15,28 +16,28 @@ public class AuthorController {
     private final AuthorService authorService;
 
     @GetMapping
-    public List<Author> getAllAuthors () {
+    public List<AuthorResponseDto> getAllAuthors () {
         return authorService.getAllAuthors();
     }
 
     @GetMapping("name/{name}")
-    public Author getAuthorByName(@PathVariable String name) {
+    public AuthorResponseDto getAuthorByName(@PathVariable String name) {
         return authorService.getAuthorByName(name);
     }
 
     @GetMapping("/{id}")
-    public Author getAuthorById(@PathVariable Long id) {
+    public AuthorResponseDto getAuthorById(@PathVariable Long id) {
         return authorService.getAuthorById(id);
     }
 
     @PostMapping
-    public Author createAuthor(@RequestBody Author author) {
-        return authorService.createAuthor(author);
+    public AuthorResponseDto createAuthor(@RequestBody AuthorRequestDto authorRequestDto) {
+        return authorService.createAuthor(authorRequestDto);
     }
 
-    @PutMapping
-    public Author updateAuthor(@RequestBody Author authorDetails) {
-        return authorService.updateAuthor(authorDetails);
+    @PutMapping("/{id}")
+    public AuthorResponseDto updateAuthor(@PathVariable Long id, @RequestBody AuthorRequestDto authorRequestDto) {
+        return authorService.updateAuthor(id, authorRequestDto);
     }
 
     @DeleteMapping("/{id}")

@@ -1,6 +1,7 @@
 package com.agents58.bibliotheca58.controller;
 
-import com.agents58.bibliotheca58.model.Book;
+import com.agents58.bibliotheca58.dto.BookRequestDto;
+import com.agents58.bibliotheca58.dto.BookResponseDto;
 import com.agents58.bibliotheca58.service.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -15,36 +16,36 @@ public class BookController {
     private final BookService bookService;
 
     @GetMapping
-    public List<Book> getAllBooks() {
+    public List<BookResponseDto> getAllBooks() {
         return bookService.getAllBooks();
     }
 
     @GetMapping("/{id}")
-    public Book getBook(@PathVariable Long id) {
+    public BookResponseDto getBook(@PathVariable Long id) {
         return bookService.getBookById(id);
     }
     @GetMapping("/genre/{genre}")
-    public List<Book> getBooksByGenre(@PathVariable String genre) {
+    public List<BookResponseDto> getBooksByGenre(@PathVariable String genre) {
         return bookService.getBooksByGenre(genre);
     }
     @GetMapping("/title/{title}")
-    public Book getBookByTitle(@PathVariable String title) {
+    public BookResponseDto getBookByTitle(@PathVariable String title) {
         return bookService.getBookByTitle(title);
     }
 
     @GetMapping("/price/{price}")
-    public List<Book> getBooksByPriceGreaterThan(@PathVariable Double price) {
+    public List<BookResponseDto> getBooksByPriceGreaterThan(@PathVariable Double price) {
         return bookService.getBooksByPriceGreaterThan(price);
     }
 
     @PostMapping
-    public Book createBook(@RequestBody Book book) {
-        return bookService.createBook(book);
+    public BookResponseDto createBook(@RequestBody BookRequestDto bookRequestDto) {
+        return bookService.createBook(bookRequestDto);
     }
 
-    @PutMapping
-    public Book updateBook( @RequestBody Book bookDetails) {
-        return bookService.updateBook(bookDetails);
+    @PutMapping("/{id}")
+    public BookResponseDto updateBook(@PathVariable Long id, @RequestBody BookRequestDto bookRequestDto) {
+        return bookService.updateBook(id, bookRequestDto);
     }
 
     @DeleteMapping("/{id}")

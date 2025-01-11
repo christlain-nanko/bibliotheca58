@@ -1,7 +1,8 @@
 package com.agents58.bibliotheca58.controller;
 
 
-import com.agents58.bibliotheca58.model.Loan;
+import com.agents58.bibliotheca58.dto.LoanRequestDto;
+import com.agents58.bibliotheca58.dto.LoanResponseDto;
 import com.agents58.bibliotheca58.service.LoanService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("api/loans")
@@ -19,29 +19,27 @@ public class LoanController {
     private final LoanService loanService;
 
     @GetMapping
-    public List<Loan> getAllLoans () {
+    public List<LoanResponseDto> getAllLoans () {
         return loanService.getAllLoans();
     }
 
     @GetMapping("/{loanId}")
-    public Loan getLoan(@PathVariable Long loanId) {
+    public LoanResponseDto getLoan(@PathVariable Long loanId) {
         return loanService.getLoanById(loanId);
     }
 
     @GetMapping("/member/{memberId}")
-    public List<Loan> getLoanByMemberId(@PathVariable Long memberId){
+    public List<LoanResponseDto> getLoanByMemberId(@PathVariable Long memberId){
         return loanService.getLoansByMemberId(memberId);
     }
 
     @PostMapping
-    public Loan createLoan(@RequestParam Long memberId, @RequestParam Set<Long> bookIds) {
-        return loanService.createLoan(memberId, bookIds);
+    public LoanResponseDto createLoan(LoanRequestDto loanRequestDto) {
+        return loanService.createLoan(loanRequestDto);
     }
 
     @PutMapping("/return/{loanId}")
-    public Loan returnLoan(@PathVariable Long loanId) {
+    public LoanResponseDto returnLoan(@PathVariable Long loanId) {
         return loanService.returnLoan(loanId);
     }
-
-
 }
