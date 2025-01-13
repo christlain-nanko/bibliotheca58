@@ -14,8 +14,15 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.NoSuchElementException;
 
+
+/**
+ * Service class for managing loans in the Bibliotheca58 application.
+ *
+ * This class handles business logic for operations such as creating,
+ * returning, retrieving, and deleting loan.
+ */
 @Service
 @RequiredArgsConstructor
 public class LoanService {
@@ -25,9 +32,16 @@ public class LoanService {
     private final LoanRepository loanRepository;
 
 
-    public LoanResponseDto getLoanById(Long loanId) {
-        Loan loan = loanRepository.findById(loanId)
-                .orElseThrow(() -> new RuntimeException("Loan not found"));
+    /**
+     * Retrieves a loan by their ID.
+     *
+     * @param id the ID of the loan to retrieve
+     * @return the details of the loan as a {@link LoanResponseDto }
+     * @throws NoSuchElementException if no loan is found with the given ID
+     */
+    public LoanResponseDto getLoanById(Long id) {
+        Loan loan = loanRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Loan not found"));
 
         return new LoanResponseDto(
                 loan.getId(),
@@ -40,6 +54,11 @@ public class LoanService {
         );
     }
 
+    /**
+     * Retrieves a list of all loans in the library.
+     *
+     *@return a list of {@link LoanResponseDto} containing details of all Loans
+     */
     public List<LoanResponseDto> getAllLoans() {
         return loanRepository.findAll().stream()
                 .map(loan -> new LoanResponseDto(
@@ -53,8 +72,19 @@ public class LoanService {
                 ).toList();
     }
 
-    public List<LoanResponseDto> getLoansByMemberId(Long memberId) {
-        return loanRepository.findByMemberId(memberId).stream()
+    /**
+     * Retrieves a list of loans associated with a specific member by their ID.
+     *
+     * @param id the unique ID of the member whose loans are to be retrieved
+     * @return a list of {@link LoanResponseDto} containing the details of the member's loans
+     * @throws NoSuchElementException if no member with the given ID is found
+     */
+    public List<LoanResponseDto> getLoansByMemberId(Long id) {
+
+       memberRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Member with ID " + id + " not found"));
+
+        return loanRepository.findByMemberId(id).stream()
                 .map( loan -> new LoanResponseDto(
                         loan.getId(),
                         loan.getDateOfLoan(),
@@ -66,9 +96,17 @@ public class LoanService {
                 ).toList();
     }
 
+    /**
+     * Creates a new loan for a member with the specified books.
+     *
+     * @param loanRequestDto the details of the loan, including the member ID, book IDs, and lend date
+     * @return a {@link LoanResponseDto} containing the details of the created loan
+     * @throws NoSuchElementException if the member or one or more books are not found
+     * @throws IllegalStateException if the member has already loaned the maximum allowed number of books
+     */
     public LoanResponseDto createLoan(LoanRequestDto loanRequestDto) {
         Member member = memberRepository.findById(loanRequestDto.memberId())
-                .orElseThrow(() -> new RuntimeException("Member with ID:" + loanRequestDto.memberId() + "not found"));
+                .orElseThrow(() -> new NoSuchElementException("Member with ID:" + loanRequestDto.memberId() + "not found"));
 
         List<Loan> memberLoans = loanRepository.findByMemberId(member.getId());
         long numberOfBooksOnLoan = memberLoans.stream()
@@ -86,7 +124,7 @@ public class LoanService {
         // check if books exist
         List<Book> books = bookRepository.findAllById(loanRequestDto.bookIds());
         if (books.size() != loanRequestDto.bookIds().size()) {
-            throw new RuntimeException ("One or more books not found for the given IDs: " + loanRequestDto.bookIds());
+            throw new NoSuchElementException ("One or more books not found for the given IDs: " + loanRequestDto.bookIds());
         }
 
         Loan loan = new Loan();
@@ -107,9 +145,22 @@ public class LoanService {
     }
 
 
-    public LoanResponseDto returnLoan(Long loanId) {
-        Loan loan = loanRepository.findById(loanId)
-                .orElseThrow(() -> new RuntimeException("Loan with ID " + loanId + " not found"));
+    /**
+     * Marks a loan as returned by setting the current date.
+     *
+     * @param id the ID of the loan to be returned
+     * @return a {@link LoanResponseDto} containing the updated loan details
+     * @throws NoSuchElementException if the loan with the given ID is not found
+     * @throws IllegalStateException if the loan has already been returned
+     */
+    public LoanResponseDto returnLoan(Long id) {
+        Loan loan = loanRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Loan with ID " + id + " not found"));
+
+        if (loan.getDateOfReturn() != null) {
+            throw new IllegalStateException("Loan with ID " + id + " has already been returned on " + loan.getDateOfReturn());
+        }
+
         loan.setDateOfReturn(LocalDate.now());
         Loan updatedLoan = loanRepository.save(loan);
 
