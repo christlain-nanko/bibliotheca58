@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 
 /**
@@ -178,6 +179,14 @@ public class LoanService {
         }
 
         loan.setDateOfReturn(LocalDate.now());
+
+        // Set all books to AVAILABLE
+        Set<Book> books = loan.getBooks();
+        for (Book book : books) {
+            book.setStatus(BookStatus.AVAILABLE);
+        }
+
+        bookRepository.saveAll(books);
         Loan updatedLoan = loanRepository.save(loan);
 
         return new LoanResponseDto(

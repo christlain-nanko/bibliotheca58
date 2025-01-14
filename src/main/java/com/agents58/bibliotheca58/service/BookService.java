@@ -43,7 +43,8 @@ public class BookService {
                 book.getTitle(),
                 book.getGenre(),
                 book.getPrice(),
-                book.getAuthor().getName()
+                book.getAuthor().getName(),
+                book.getStatus()
         );
     }
 
@@ -63,7 +64,8 @@ public class BookService {
                 book.getTitle(),
                 book.getGenre(),
                 book.getPrice(),
-                book.getAuthor().getName()
+                book.getAuthor().getName(),
+                book.getStatus()
         );
     }
 
@@ -80,7 +82,8 @@ public class BookService {
                         book.getTitle(),
                         book.getGenre(),
                         book.getPrice(),
-                        book.getAuthor().getName())
+                        book.getAuthor().getName(),
+                        book.getStatus())
                 ).toList();
     }
 
@@ -97,7 +100,8 @@ public class BookService {
                         book.getTitle(),
                         book.getGenre(),
                         book.getPrice(),
-                        book.getAuthor().getName())
+                        book.getAuthor().getName(),
+                        book.getStatus())
                 ).toList();
     }
 
@@ -113,7 +117,8 @@ public class BookService {
                         book.getTitle(),
                         book.getGenre(),
                         book.getPrice(),
-                        book.getAuthor().getName())
+                        book.getAuthor().getName(),
+                        book.getStatus())
                 ).toList();
     }
 
@@ -151,7 +156,8 @@ public class BookService {
                 newBook.getTitle(),
                 newBook.getGenre(),
                 newBook.getPrice(),
-                newBook.getAuthor().getName()
+                newBook.getAuthor().getName(),
+                newBook.getStatus()
         );
     }
 
@@ -182,7 +188,8 @@ public class BookService {
                 updatedBook.getTitle(),
                 updatedBook.getGenre(),
                 updatedBook.getPrice(),
-                updatedBook.getAuthor().getName()
+                updatedBook.getAuthor().getName(),
+                updatedBook.getStatus()
         );
     }
 
