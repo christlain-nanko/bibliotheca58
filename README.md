@@ -109,6 +109,7 @@ Run unit tests:
 - Pagination and Sorting
 - Book Reservation System
 - AI-Powered Recommendations
+- increase Tests Coverage
 
 ---
 ## Contributing
