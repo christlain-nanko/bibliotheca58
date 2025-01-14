@@ -10,6 +10,7 @@ for API documentation.
 
 - **Book Management**:
     - Add, update, delete, and retrieve book details.
+    - The library has only one copy of each book.
     - Filter books by genre, title or price range.
   
 - **Author Management**:
