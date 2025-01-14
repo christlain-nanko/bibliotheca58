@@ -24,4 +24,7 @@ public class Book {
     @ManyToOne
     @JoinColumn(name =  "author_id")
     private Author author;
+
+    @Enumerated(EnumType.STRING)
+    private BookStatus status = BookStatus.AVAILABLE;
 }

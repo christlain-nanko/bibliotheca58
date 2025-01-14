@@ -104,8 +104,14 @@ public class MemberService {
      *
      * @param memberRequestDto the details of the member to be created
      * @return a {@link MemberResponseDto} containing the created member's details
+     * @throws IllegalArgumentException if member with the same username or email already exists
      */
     public MemberResponseDto createMember(MemberRequestDto memberRequestDto) {
+
+        if (memberRepository.existsByUsername(memberRequestDto.username()) || memberRepository.existsByEmail(memberRequestDto.email())) {
+            throw new IllegalArgumentException("A member with the same username or email already exists.");
+        }
+
         Member member = new Member();
         member.setUsername(memberRequestDto.username());
         member.setEmail(memberRequestDto.email());

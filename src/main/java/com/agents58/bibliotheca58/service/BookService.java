@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 /**
  * Service class for managing books in the Bibliotheca58 application.
@@ -121,11 +122,22 @@ public class BookService {
      *
      * @param bookRequestDto the details of the book to be created
      * @return a {@link BookResponseDto} containing the created book's details
+     * @throws NoSuchElementException if an author with the given ID not found
+     * @throws IllegalArgumentException if a book with the same  title and author already exists .
      */
     public BookResponseDto createBook(BookRequestDto bookRequestDto) {
 
+        Optional<Book> existingBook = bookRepository.findByTitleAndAuthorId(
+                bookRequestDto.title(),
+                bookRequestDto.authorId()
+        );
+
         Author author = authorRepository.findById(bookRequestDto.authorId())
                 .orElseThrow(() -> new RuntimeException("Author with ID " + bookRequestDto.authorId() + " not found"));
+
+        if (existingBook.isPresent()) {
+            throw new IllegalArgumentException("A book with the title: " + bookRequestDto.title()+ " from  author: " + author.getName() + " already exists.");
+        }
 
         Book book = new Book();
         book.setTitle(bookRequestDto.title());

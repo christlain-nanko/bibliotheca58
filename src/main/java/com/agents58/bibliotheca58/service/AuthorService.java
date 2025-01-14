@@ -75,8 +75,13 @@ public class AuthorService {
      *
      * @param authorRequestDto the details of the author to be created
      * @return a {@link AuthorResponseDto} containing the created author's details
+     * @throws IllegalArgumentException if author with the same name and date already exists
      */
     public AuthorResponseDto createAuthor(AuthorRequestDto authorRequestDto) {
+
+        if (authorRepository.existsByNameAndDateOfBirth(authorRequestDto.name(), authorRequestDto.dateOfBirth())) {
+            throw new IllegalArgumentException("An author with the same name and date of birth already exists.");
+        }
         Author author = new Author();
         author.setName(authorRequestDto.name());
         author.setDateOfBirth(authorRequestDto.dateOfBirth());

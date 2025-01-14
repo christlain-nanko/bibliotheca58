@@ -3,6 +3,7 @@ package com.agents58.bibliotheca58.service;
 import com.agents58.bibliotheca58.dto.LoanRequestDto;
 import com.agents58.bibliotheca58.dto.LoanResponseDto;
 import com.agents58.bibliotheca58.model.Book;
+import com.agents58.bibliotheca58.model.BookStatus;
 import com.agents58.bibliotheca58.model.Loan;
 import com.agents58.bibliotheca58.model.Member;
 import com.agents58.bibliotheca58.repository.BookRepository;
@@ -102,7 +103,8 @@ public class LoanService {
      * @param loanRequestDto the details of the loan, including the member ID, book IDs, and lend date
      * @return a {@link LoanResponseDto} containing the details of the created loan
      * @throws NoSuchElementException if the member or one or more books are not found
-     * @throws IllegalStateException if the member has already loaned the maximum allowed number of books
+     * @throws IllegalStateException if the member has already loaned the maximum allowed number of books or
+     * book in the collection is already lent out
      */
     public LoanResponseDto createLoan(LoanRequestDto loanRequestDto) {
         Member member = memberRepository.findById(loanRequestDto.memberId())
@@ -121,11 +123,25 @@ public class LoanService {
                     + numberOfBooksOnLoan + ", Requested: " + requestedBookCount);
         }
 
-        // check if books exist
         List<Book> books = bookRepository.findAllById(loanRequestDto.bookIds());
+
+        // check if books exist
         if (books.size() != loanRequestDto.bookIds().size()) {
             throw new NoSuchElementException ("One or more books not found for the given IDs: " + loanRequestDto.bookIds());
         }
+
+        // check if books already lent out
+        for (Book book : books) {
+            if (book.getStatus() == BookStatus.LENT) {
+                throw new IllegalStateException("Book '" + book.getTitle() + "' is already lent out.");
+            }
+        }
+
+        // mark books as lent
+        for (Book book : books) {
+            book.setStatus(BookStatus.LENT);
+        }
+        bookRepository.saveAll(books);
 
         Loan loan = new Loan();
         loan.setMember(member);
